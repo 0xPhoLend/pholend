@@ -1,0 +1,8 @@
+{
+	"name": "ValidationLogic",
+	"contractAddress": "0xFaF2313e43E7fabe01CdacF5f0430341762a48C5",
+	"args": [],
+	"libraries": {
+		"GenericLogic": "0x0ed260Fc09228774800344ddF4D39472eDef30f9"
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"title": "Mint title",
+	"description": "mint desc.",
+	"stories": [
+		{
+			"description": "User 0 mint 1000 DAI",
+			"actions": [
+				{
+					"name": "mint",
+					"args": {
+						"reserve": "DAI",
+						"amount": "1000",
+						"user": "0"
+					},
+					"expected": "success"
+				}
+			]
+		}
+	]
+}

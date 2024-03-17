@@ -1,0 +1,4 @@
+package-lock.json
+
+# Ignore documaentation files from solidity-docgen and others
+*.md
