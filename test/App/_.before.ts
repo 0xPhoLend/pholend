@@ -13,6 +13,7 @@ import {
 	MintableERC20,
 	MockFlashLoanReceiver,
 	PriceOracle,
+	UiPoolDataProvider,
 	WETH9Mocked,
 	WETHGateway,
 } from '../../typechain-types'
@@ -35,14 +36,13 @@ export const testEnv: ITestEnv = {
 	registry: {} as LendingPoolAddressesProviderRegistry,
 	wethGateway: {} as WETHGateway,
 	reserveTreasury: {} as InitializableAdminUpgradeabilityProxy,
-	incentivesController: {} as InitializableImmutableAdminUpgradeabilityProxy,
+	incentivesController: {} as InitializableAdminUpgradeabilityProxy,
 	_mockFlashLoanReceiver: {} as MockFlashLoanReceiver,
 	lendingRateOracle: {} as LendingRateOracle,
 	aave: {} as MintableERC20,
-	emergencyAdmin: {} as HardhatEthersSigner,
-	poolAdmin: {} as HardhatEthersSigner,
 	ownerPrivateKey: {} as string,
 	link: {} as MintableERC20,
+	uiPoolDataProvider: {} as UiPoolDataProvider,
 }
 
 export const makeEnv = async () => {
@@ -67,8 +67,7 @@ export const makeEnv = async () => {
 	testEnv._mockFlashLoanReceiver = deployedApp.mockFlashLoanReceiver
 	testEnv.lendingRateOracle = deployedApp.lendingRateOracle
 	testEnv.aave = deployedApp.aave
-	testEnv.poolAdmin = deployedApp.poolAdmin
-	testEnv.emergencyAdmin = deployedApp.emergencyAdmin
 	testEnv.ownerPrivateKey = deployedApp.ownerPrivateKey
 	testEnv.link = deployedApp.link
+	testEnv.uiPoolDataProvider = deployedApp.uiPoolDataProvider
 }

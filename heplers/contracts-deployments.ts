@@ -1,4 +1,4 @@
-import { AddressLike, BaseContract } from 'ethers'
+import { AddressLike, BaseContract, Addressable } from 'ethers'
 import { ethers } from 'hardhat'
 import { waitAndLogDeployment } from './helpers'
 import { IArgsForReserve, IDeployedStrategies, IReserveAsset } from './types'
@@ -241,12 +241,13 @@ export async function deployWETHGateway(
 export async function deployContractsForReserve(
 	isWriteInFs: boolean,
 	asset: IReserveAsset,
-	lendingPoolProxy: BaseContract,
-	reserveTreasury: BaseContract,
-	incentivesController: BaseContract,
-	addressesProvider: BaseContract,
-	deployedStrategies: IDeployedStrategies,
+	lendingPoolProxy: string,
+	reserveTreasury: string,
+	incentivesController: string,
+	addressesProvider: string,
+	// deployedStrategies: IDeployedStrategies,
 ) {
+	const deployedStrategies: IDeployedStrategies = {}
 	const AToken = await ethers.getContractFactory('AToken')
 	const aToken = await AToken.deploy(
 		lendingPoolProxy,
@@ -258,12 +259,12 @@ export async function deployContractsForReserve(
 	)
 	const verifyArgsAToken = isWriteInFs
 		? [
-				lendingPoolProxy.target,
+				lendingPoolProxy,
 				asset.address,
-				reserveTreasury.target,
+				reserveTreasury,
 				`Interest bearing ${asset.symbol}`,
 				`a${asset.symbol}`,
-				incentivesController.target,
+				incentivesController,
 			]
 		: null
 	await waitAndLogDeployment(aToken, `a${asset.symbol}`, verifyArgsAToken)
@@ -278,11 +279,11 @@ export async function deployContractsForReserve(
 	)
 	const verifyArgsStable = isWriteInFs
 		? [
-				lendingPoolProxy.target,
+				lendingPoolProxy,
 				asset.address,
 				`Stable debt bearing ${asset.symbol}`,
 				`stableDebt${asset.symbol}`,
-				incentivesController.target,
+				incentivesController,
 			]
 		: null
 
@@ -303,11 +304,11 @@ export async function deployContractsForReserve(
 	)
 	const verifyArgsVariable = isWriteInFs
 		? [
-				lendingPoolProxy.target,
+				lendingPoolProxy,
 				asset.address,
 				`Variable debt bearing ${asset.symbol}`,
 				`VariableDebt${asset.symbol}`,
-				incentivesController.target,
+				incentivesController,
 			]
 		: null
 
@@ -336,7 +337,7 @@ export async function deployContractsForReserve(
 		)
 		const verifyArgs = isWriteInFs
 			? [
-					addressesProvider.target,
+					addressesProvider,
 					config.strategy.optimalUtilizationRate,
 					config.strategy.baseVariableBorrowRate,
 					config.strategy.variableRateSlope1,
@@ -376,9 +377,14 @@ export async function deployReserveTreasury(
 	isWriteInFs: boolean,
 	owner: AddressLike,
 ) {
-	const AaveCollector = await ethers.getContractFactory('AaveCollector')
-	const aaveCollector = await AaveCollector.deploy()
-	await aaveCollector.waitForDeployment()
+	const PlugForProxy = await ethers.getContractFactory('PlugForTreasury')
+	const plugForProxy = await PlugForProxy.deploy()
+	const verifyArgsForPlug = isWriteInFs ? [] : null
+	await waitAndLogDeployment(
+		plugForProxy,
+		'PlugForProxyReserveTreasury',
+		verifyArgsForPlug,
+	)
 
 	const ReserveTreasury = await ethers.getContractFactory(
 		'InitializableAdminUpgradeabilityProxy',
@@ -391,7 +397,7 @@ export async function deployReserveTreasury(
 	//data is from https://dashboard.tenderly.co/tx/mainnet/0x6147c76272cdb7ef1ff4ef9ce4c6f43349f6d7510759faa8f223e4c0388d1c96?trace=0.3
 	const data = '0x8129fc1c'
 	await reserveTreasury['initialize(address,address,bytes)'](
-		aaveCollector,
+		plugForProxy,
 		owner,
 		data,
 	)
@@ -403,18 +409,37 @@ export async function deployIncentivesController(
 	isWriteInFs: boolean,
 	owner: AddressLike,
 ) {
-	const IncentivesController = await ethers.getContractFactory(
-		'InitializableImmutableAdminUpgradeabilityProxy',
+	const PlugForProxy = await ethers.getContractFactory(
+		'PlugForIncentivesController',
 	)
-	const incentivesController = await IncentivesController.deploy(owner)
+	const plugForProxy = await PlugForProxy.deploy()
+	const verifyArgsForPlug = isWriteInFs ? [] : null
+	await waitAndLogDeployment(
+		plugForProxy,
+		'PlugForIncentivesController',
+		verifyArgsForPlug,
+	)
 
-	const verifyArgs = isWriteInFs ? [owner] : null
+	const IncentivesController = await ethers.getContractFactory(
+		'InitializableAdminUpgradeabilityProxy',
+	)
+	const incentivesController = await IncentivesController.deploy()
+
+	const verifyArgs = isWriteInFs ? [] : null
 
 	await waitAndLogDeployment(
 		incentivesController,
 		'IncentivesController',
 		verifyArgs,
 	)
+
+	const data = '0x8129fc1c'
+	await incentivesController['initialize(address,address,bytes)'](
+		plugForProxy,
+		owner,
+		data,
+	)
+
 	return incentivesController
 }
 

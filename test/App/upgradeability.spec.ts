@@ -58,7 +58,7 @@ export const UpgradeabilityTest = () => {
 	})
 
 	it('Tries to update the DAI Atoken implementation with a different address than the lendingPoolManager', async () => {
-		const { dai, configurator, users, poolAdmin } = testEnv
+		const { dai, configurator, users } = testEnv
 		const name = await newAToken.name()
 		const symbol = await newAToken.symbol()
 
@@ -68,7 +68,7 @@ export const UpgradeabilityTest = () => {
 	})
 
 	it('Upgrades the DAI Atoken implementation ', async () => {
-		const { dai, configurator, aDai, poolAdmin, users, pool } = testEnv
+		const { dai, configurator, aDai, users, pool } = testEnv
 
 		await configurator.updateAToken(dai, newAToken)
 

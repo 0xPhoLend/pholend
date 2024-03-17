@@ -14,7 +14,7 @@ export const PausablePoolTest = () => {
 	} = ProtocolErrors
 
 	it('User 0 deposits 1000 DAI. Configurator pauses pool. Transfers to user 1 reverts. Configurator unpauses the network and next transfer succees', async () => {
-		const { users, pool, dai, aDai, configurator, emergencyAdmin } = testEnv
+		const { users, pool, dai, aDai, configurator } = testEnv
 
 		const amountDAItoDeposit = await convertToCurrencyDecimals(dai, '1000')
 
@@ -30,7 +30,7 @@ export const PausablePoolTest = () => {
 		const user1Balance = await aDai.balanceOf(users[1].address)
 
 		// Configurator pauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// User 0 tries the transfer to User 1
 		await expect(
@@ -52,7 +52,7 @@ export const PausablePoolTest = () => {
 		)
 
 		// Configurator unpauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 
 		// User 0 succeeds transfer to User 1
 		await aDai
@@ -73,7 +73,7 @@ export const PausablePoolTest = () => {
 	})
 
 	it('Deposit', async () => {
-		const { users, pool, dai, aDai, configurator, emergencyAdmin } = testEnv
+		const { users, pool, dai, aDai, configurator } = testEnv
 
 		const amountDAItoDeposit = await convertToCurrencyDecimals(dai, '1000')
 
@@ -83,7 +83,7 @@ export const PausablePoolTest = () => {
 		await dai.connect(users[0]).approve(pool, APPROVAL_AMOUNT_LENDING_POOL)
 
 		// Configurator pauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 		await expect(
 			pool
 				.connect(users[0])
@@ -91,11 +91,11 @@ export const PausablePoolTest = () => {
 		).to.revertedWith(LP_IS_PAUSED)
 
 		// Configurator unpauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('Withdraw', async () => {
-		const { users, pool, dai, aDai, configurator, emergencyAdmin } = testEnv
+		const { users, pool, dai, aDai, configurator } = testEnv
 
 		const amountDAItoDeposit = await convertToCurrencyDecimals(dai, '1000')
 
@@ -108,7 +108,7 @@ export const PausablePoolTest = () => {
 			.deposit(dai, amountDAItoDeposit, users[0].address, '0')
 
 		// Configurator pauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// user tries to burn
 		await expect(
@@ -118,15 +118,15 @@ export const PausablePoolTest = () => {
 		).to.revertedWith(LP_IS_PAUSED)
 
 		// Configurator unpauses the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('Borrow', async () => {
-		const { pool, dai, users, configurator, emergencyAdmin } = testEnv
+		const { pool, dai, users, configurator } = testEnv
 
 		const user = users[1]
 		// Pause the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// Try to execute liquidation
 		await expect(
@@ -134,15 +134,15 @@ export const PausablePoolTest = () => {
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('Repay', async () => {
-		const { pool, dai, users, configurator, emergencyAdmin } = testEnv
+		const { pool, dai, users, configurator } = testEnv
 
 		const user = users[1]
 		// Pause the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// Try to execute liquidation
 		await expect(
@@ -150,19 +150,12 @@ export const PausablePoolTest = () => {
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause the pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('Flash loan', async () => {
-		const {
-			dai,
-			pool,
-			weth,
-			users,
-			configurator,
-			_mockFlashLoanReceiver,
-			emergencyAdmin,
-		} = testEnv
+		const { dai, pool, weth, users, configurator, _mockFlashLoanReceiver } =
+			testEnv
 
 		const caller = users[3]
 
@@ -171,7 +164,7 @@ export const PausablePoolTest = () => {
 		await _mockFlashLoanReceiver.setFailExecutionTransfer(true)
 
 		// Pause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		await expect(
 			pool
@@ -188,7 +181,7 @@ export const PausablePoolTest = () => {
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('Liquidation call', async () => {
@@ -200,7 +193,6 @@ export const PausablePoolTest = () => {
 			weth,
 			configurator,
 			helpersContract,
-			emergencyAdmin,
 		} = testEnv
 		const depositor = users[3]
 		const borrower = users[4]
@@ -283,7 +275,7 @@ export const PausablePoolTest = () => {
 			.toFixed(0)
 
 		// Pause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// Do liquidation
 		await expect(
@@ -297,12 +289,11 @@ export const PausablePoolTest = () => {
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('SwapBorrowRateMode', async () => {
-		const { pool, weth, dai, usdc, users, configurator, emergencyAdmin } =
-			testEnv
+		const { pool, weth, dai, usdc, users, configurator } = testEnv
 		const user = users[1]
 		const amountWETHToDeposit = ethers.parseEther('10')
 		const amountDAIToDeposit = ethers.parseEther('120')
@@ -325,7 +316,7 @@ export const PausablePoolTest = () => {
 			.borrow(usdc, amountToBorrow, 2, 0, user.address)
 
 		// Pause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		// Try to repay
 		await expect(
@@ -333,25 +324,25 @@ export const PausablePoolTest = () => {
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('RebalanceStableBorrowRate', async () => {
-		const { pool, dai, users, configurator, emergencyAdmin } = testEnv
+		const { pool, dai, users, configurator } = testEnv
 		const user = users[1]
 		// Pause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		await expect(
 			pool.connect(user).rebalanceStableBorrowRate(dai, user.address),
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 
 	it('setUserUseReserveAsCollateral', async () => {
-		const { pool, weth, users, configurator, emergencyAdmin } = testEnv
+		const { pool, weth, users, configurator } = testEnv
 		const user = users[1]
 
 		const amountWETHToDeposit = ethers.parseEther('1')
@@ -362,13 +353,13 @@ export const PausablePoolTest = () => {
 			.deposit(weth, amountWETHToDeposit, user.address, '0')
 
 		// Pause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(true)
+		await configurator.setPoolPause(true)
 
 		await expect(
 			pool.connect(user).setUserUseReserveAsCollateral(weth, false),
 		).revertedWith(LP_IS_PAUSED)
 
 		// Unpause pool
-		await configurator.connect(emergencyAdmin).setPoolPause(false)
+		await configurator.setPoolPause(false)
 	})
 }

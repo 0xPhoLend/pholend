@@ -25,12 +25,12 @@ const config: HardhatUserConfig = {
 		],
 	},
 	networks,
-	gasReporter: {
-		enabled: true,
-		currency: 'USD',
-		gasPrice: 30,
-		coinmarketcap: 'af8ddfb6-5886-41fe-80b5-19259a3a03be',
-	},
+	// gasReporter: {
+	// 	enabled: true,
+	// 	currency: 'USD',
+	// 	gasPrice: 30,
+	// 	coinmarketcap: 'af8ddfb6-5886-41fe-80b5-19259a3a03be',
+	// },
 	etherscan: {
 		apiKey: {
 			// Moonbeam

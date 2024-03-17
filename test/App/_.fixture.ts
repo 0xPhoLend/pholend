@@ -1,8 +1,8 @@
 import { ethers, network } from 'hardhat'
-import { AddressLike } from 'ethers'
 import { deployApp } from '../../heplers/deployApp'
-import { networksData } from '../../heplers/data'
+import { networksData, newTestAssets } from '../../heplers/data'
 import { oneEther } from '../../heplers/constants'
+import { deployReserves } from '../../heplers/deployReserves'
 
 export async function deployAppFixture() {
 	const data = networksData.test
@@ -14,6 +14,7 @@ export async function deployAppFixture() {
 	const usdc = await MintableERC20.deploy('USDC token', 'USDC', 6)
 	const aave = await MintableERC20.deploy('DAI token', 'AAVE', 18)
 	const link = await MintableERC20.deploy('LINK token', 'LINK', 18)
+	const newToken = await MintableERC20.deploy('NEW token', 'NEW', 18)
 	const weth = await WETH9Mocked.deploy()
 
 	const PriceOracle = await ethers.getContractFactory('PriceOracle')
@@ -33,17 +34,22 @@ export async function deployAppFixture() {
 	const linkAggregator = await MockAggregator.deploy(
 		oneEther.multipliedBy('0.009955').toFixed(),
 	)
+	const newTokenAggregator = await MockAggregator.deploy(
+		oneEther.multipliedBy('0.009955').toFixed(),
+	)
 
 	data[0].address = await dai.getAddress()
 	data[1].address = await usdc.getAddress()
 	data[2].address = await weth.getAddress()
 	data[3].address = await aave.getAddress()
 	data[4].address = await link.getAddress()
+	newTestAssets[0].address = await newToken.getAddress()
 	data[0].chainlinkAggregator = await daiAggregator.getAddress()
 	data[1].chainlinkAggregator = await usdcAggregator.getAddress()
 	data[2].chainlinkAggregator = await wethAggregator.getAddress()
 	data[3].chainlinkAggregator = await aaveAggregator.getAddress()
 	data[4].chainlinkAggregator = await linkAggregator.getAddress()
+	newTestAssets[0].chainlinkAggregator = await newTokenAggregator.getAddress()
 
 	await priceOracle.setAssetPrice(
 		dai,
@@ -62,14 +68,28 @@ export async function deployAppFixture() {
 		link,
 		oneEther.multipliedBy('0.009955').toFixed(),
 	)
-	const deployer = (await ethers.getSigners())[0]
-	const deployedApp = await deployApp(
-		networksData.test,
-		false,
-		deployer.address,
-		'WETH',
+	await priceOracle.setAssetPrice(
+		newToken,
+		oneEther.multipliedBy('0.009955').toFixed(),
 	)
 
+	const deployer = (await ethers.getSigners())[0]
+	const deployedApp = await deployApp(networksData.test, false, 'WETH')
+	await deployReserves(
+		newTestAssets,
+		await deployedApp.aaveOracle.getAddress(),
+		await deployedApp.lendingRateOracle.getAddress(),
+		await deployedApp.stableAndVariableTokensHelper.getAddress(),
+		deployer.address,
+		await deployedApp.addressesProvider.getAddress(''),
+		false,
+		await deployedApp.lendingPoolProxy.getAddress(),
+		await deployedApp.reserveTreasury.getAddress(),
+		await deployedApp.incentivesController.getAddress(),
+		await deployedApp.lendingPoolConfiguratorProxy.getAddress(),
+		await deployedApp.aTokensAndRatesHelper.getAddress(),
+	)
+	data.push(newTestAssets[0])
 	await deployedApp.addressesProvider.setPriceOracle(priceOracle)
 
 	const MockFlashLoanReceiver = await ethers.getContractFactory(

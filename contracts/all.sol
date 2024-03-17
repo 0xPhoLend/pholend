@@ -19,6 +19,8 @@ import "@aave/protocol-v2/contracts/deployments/StableAndVariableTokensHelper.so
 
 import "@aave/protocol-v2/contracts/misc/AaveOracle.sol";
 import "@aave/protocol-v2/contracts/misc/WalletBalanceProvider.sol";
+
+import "@aave/protocol-v2/contracts/misc/UiPoolDataProvider.sol";
 import "@aave/protocol-v2/contracts/misc/AaveProtocolDataProvider.sol";
 import "@aave/protocol-v2/contracts/misc/WETHGateway.sol";
 

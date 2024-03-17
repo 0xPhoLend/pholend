@@ -19,6 +19,7 @@ import { UpgradeabilityTest } from './upgradeability.spec'
 import { VariableDebtTokenTest } from './variable-debt-token.spec'
 import { WETHGatewayTest } from './weth-gateway.spec'
 import { treasuryTest } from './treasury.spec'
+import { someTesting } from './for-testing-function'
 
 const scenarioFolder = './test/App/utils/scenarios/'
 const selectedScenarios: string[] = []
@@ -40,7 +41,7 @@ makeSuite(
 	LendingPoolliquidationUnderlyingTest,
 )
 makeSuite('Pausable Pool', PausablePoolTest)
-makeSuite('Interest rate strategy tests', InterestRateStrategyTest, 'only')
+makeSuite('Interest rate strategy tests', InterestRateStrategyTest)
 fs.readdirSync(scenarioFolder).forEach((file) => {
 	const scenario = require(`./utils/scenarios/${file}`)
 	makeSuite(scenario.title, async () => {
@@ -72,3 +73,4 @@ makeSuite('Upgradeability', UpgradeabilityTest)
 makeSuite('Variable debt token tests', VariableDebtTokenTest)
 makeSuite('Use native ETH at LendingPool via WETHGateway', WETHGatewayTest)
 makeSuite('Check treasury', treasuryTest)
+makeSuite('testing functions of protocol', someTesting, 'only')

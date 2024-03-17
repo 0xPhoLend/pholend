@@ -14,6 +14,7 @@ import {
 	MockFlashLoanReceiver,
 	PriceOracle,
 	StableDebtToken,
+	UiPoolDataProvider,
 	VariableDebtToken,
 	WETH9Mocked,
 	WETHGateway,
@@ -231,14 +232,13 @@ export interface ITestEnv {
 	// flashLiquidationAdapter: FlashLiquidationAdapter;
 	// paraswapLiquiditySwapAdapter: ParaSwapLiquiditySwapAdapter;
 	reserveTreasury: InitializableAdminUpgradeabilityProxy
-	incentivesController: InitializableImmutableAdminUpgradeabilityProxy
+	incentivesController: InitializableAdminUpgradeabilityProxy
 	_mockFlashLoanReceiver: MockFlashLoanReceiver
 	lendingRateOracle: LendingRateOracle
 	aave: MintableERC20
-	poolAdmin: HardhatEthersSigner
-	emergencyAdmin: HardhatEthersSigner
 	ownerPrivateKey: string
 	link: MintableERC20
+	uiPoolDataProvider: UiPoolDataProvider
 }
 
 export interface IDeployment {

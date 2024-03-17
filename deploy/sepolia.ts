@@ -3,10 +3,9 @@ import { deployApp } from '../heplers/deployApp'
 import { networksData } from '../heplers/data'
 
 export async function main() {
-	await deployApp(
+	const { lendingPoolConfiguratorProxy } = await deployApp(
 		networksData.sepolia,
 		true,
-		'0x2E34E736eff90Fe7138302FAc9Bbc8274017c47f',
 		'WETH',
 	)
 }

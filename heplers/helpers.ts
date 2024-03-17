@@ -56,7 +56,7 @@ export async function waitAndLogDeployment(
 	}
 }
 
-export const setFolderForDeployment = () => {
+export const setFolderForDeployment = (name: string) => {
 	const pathOfdeployments = `./deployments/${network.name}`
 	fs.mkdirSync(pathOfdeployments, { recursive: true })
 
@@ -66,7 +66,7 @@ export const setFolderForDeployment = () => {
 	const year = now.getFullYear()
 	const hours = now.getHours()
 	const minutes = now.getMinutes()
-	const newFolder = `${day}.${month}.${year}_${hours}.${minutes}`
+	const newFolder = `${name}_+${day}.${month}.${year}_${hours}.${minutes}`
 
 	deploymentPath = pathOfdeployments + '/' + newFolder
 	fs.mkdirSync(deploymentPath, { recursive: true })
@@ -316,4 +316,66 @@ export const chunk = <T>(arr: Array<T>, chunkSize: number): Array<Array<T>> => {
 				: prevVal,
 		[],
 	)
+}
+
+export async function transferOwnership(
+	owner: string,
+	aaveOracleAddress: string,
+	lendingRateOracleAddress: string,
+	stableAndVariableTokensHelperAddress: string,
+	addressesProviderAddress: string,
+	reserveTreasuryAddress: string,
+	incentivesControllerAddress: string,
+	aTokensAndRatesHelperAddress: string,
+	addressesProviderRegistryAddress: string,
+	wETHGatewayAddress: string,
+) {
+	const aaveOracle = await ethers.getContractAt(
+		'AaveOracle',
+		aaveOracleAddress,
+	)
+	const lendingRateOracle = await ethers.getContractAt(
+		'LendingRateOracle',
+		lendingRateOracleAddress,
+	)
+	const stableAndVariableTokensHelper = await ethers.getContractAt(
+		'StableAndVariableTokensHelper',
+		stableAndVariableTokensHelperAddress,
+	)
+	const addressesProvider = await ethers.getContractAt(
+		'LendingPoolAddressesProvider',
+		addressesProviderAddress,
+	)
+	const aTokensAndRatesHelper = await ethers.getContractAt(
+		'ATokensAndRatesHelper',
+		aTokensAndRatesHelperAddress,
+	)
+	const addressesProviderRegistry = await ethers.getContractAt(
+		'LendingPoolAddressesProviderRegistry',
+		addressesProviderRegistryAddress,
+	)
+	const wETHGateway = await ethers.getContractAt(
+		'WETHGateway',
+		wETHGatewayAddress,
+	)
+	const reserveTreasury = await ethers.getContractAt(
+		'InitializableAdminUpgradeabilityProxy',
+		reserveTreasuryAddress,
+	)
+	const incentivesController = await ethers.getContractAt(
+		'InitializableAdminUpgradeabilityProxy',
+		incentivesControllerAddress,
+	)
+
+	await stableAndVariableTokensHelper.transferOwnership(owner)
+	await aTokensAndRatesHelper.transferOwnership(owner)
+	await lendingRateOracle.transferOwnership(owner)
+	await addressesProvider.transferOwnership(owner)
+	await addressesProviderRegistry.transferOwnership(owner)
+	await incentivesController.changeAdmin(owner)
+	await reserveTreasury.changeAdmin(owner)
+	await addressesProvider.setPoolAdmin(owner)
+	await addressesProvider.setEmergencyAdmin(owner)
+	await wETHGateway.transferOwnership(owner)
+	await aaveOracle.transferOwnership(owner)
 }

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { INetworks, IStrategy } from './types'
+import { INetworks, IReserveAsset, IStrategy } from './types'
 import { ethers } from 'hardhat'
 
 const oneRay = new BigNumber(Math.pow(10, 27))
@@ -263,6 +263,57 @@ export const networksData: INetworks = {
 			},
 		},
 	],
+	'bsc-testnet': [
+		{
+			symbol: 'WBNB',
+			address: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+			chainlinkAggregator: '',
+			lendingRate: oneRay.multipliedBy(0.039).toFixed(),
+			config: {
+				strategy: rateStrategyStableTwo,
+				baseLTVAsCollateral: '7500',
+				liquidationThreshold: '8000',
+				liquidationBonus: '10500',
+				borrowingEnabled: true,
+				stableBorrowRateEnabled: true,
+				reserveDecimals: '18',
+				reserveFactor: '1000',
+			},
+		},
+		{
+			symbol: 'tCoins',
+			address: '0x3807C468D722aAf9e9A82d8b4b1674E66a12E607',
+			chainlinkAggregator: ethers.ZeroAddress,
+			lendingRate: oneRay.multipliedBy(0.039).toFixed(),
+			config: {
+				strategy: rateStrategyStableThree,
+				baseLTVAsCollateral: '8000',
+				liquidationThreshold: '8500',
+				liquidationBonus: '10500',
+				borrowingEnabled: true,
+				stableBorrowRateEnabled: true,
+				reserveDecimals: '6',
+				reserveFactor: '1000',
+			},
+		},
+	],
 }
 
-export const main = {}
+export const newTestAssets: IReserveAsset[] = [
+	{
+		symbol: 'NEW',
+		lendingRate: oneRay.multipliedBy(0.03).toFixed(),
+		address: '',
+		chainlinkAggregator: '',
+		config: {
+			strategy: rateStrategyVolatileOne,
+			baseLTVAsCollateral: '7000',
+			liquidationThreshold: '7500',
+			liquidationBonus: '11000',
+			borrowingEnabled: true,
+			stableBorrowRateEnabled: true,
+			reserveDecimals: '18',
+			reserveFactor: '2000',
+		},
+	},
+]
